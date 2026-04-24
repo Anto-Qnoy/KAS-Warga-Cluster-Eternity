@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kas Warga Cluster Eternity</title>
+    <title>Sistem Kas Warga Cluster Eternity</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -28,12 +28,13 @@
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased pb-12">
     <div id="main-container" class="max-w-md mx-auto md:max-w-5xl px-4 pt-6 md:pt-12">
+        <!-- Header -->
         <header class="mb-6">
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h1 class="text-2xl md:text-3xl font-extrabold text-blue-900 tracking-tight">Kas Warga Cluster Eternity</h1>
-                        <p class="text-sm text-gray-500">Laporan Transaksi & Data Warga</p>
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-blue-900 tracking-tight">Cluster Eternity</h1>
+                        <p class="text-sm text-gray-500">Sistem Manajemen Kas & Iuran Warga</p>
                     </div>
                     <div id="admin-status">
                         <button id="btn-login-admin" onclick="showLoginModal()" class="bg-white border border-gray-200 text-gray-700 p-2 rounded-xl shadow-sm hover:bg-gray-50">
@@ -56,14 +57,17 @@
                     </div>
                 </div>
 
+                <!-- Tab Navigation -->
                 <nav class="flex bg-white p-1 rounded-2xl shadow-sm border border-gray-100 sticky top-2 z-40">
                     <button onclick="switchTab('kas')" id="tab-kas" class="flex-1 py-3 text-sm font-bold rounded-xl transition nav-link active">Keuangan</button>
-                    <button onclick="switchTab('warga')" id="tab-warga" class="flex-1 py-3 text-sm font-bold rounded-xl transition nav-link text-gray-500">Warga</button>
+                    <button onclick="switchTab('warga')" id="tab-warga" class="flex-1 py-3 text-sm font-bold rounded-xl transition nav-link text-gray-500">Data Warga</button>
                 </nav>
             </div>
         </header>
 
+        <!-- KONTEN KAS -->
         <div id="content-kas" class="space-y-6">
+            <!-- Ringkasan Saldo -->
             <div class="flex overflow-x-auto gap-4 pb-2 snap-x">
                 <div class="min-w-[80%] md:min-w-0 md:flex-1 bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500 snap-center">
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Debit</p>
@@ -79,6 +83,7 @@
                 </div>
             </div>
 
+            <!-- Grafik Tren -->
             <div class="glass-card p-5 rounded-2xl shadow-sm bg-white border border-gray-100">
                 <h3 class="text-sm font-bold mb-4 text-gray-800 flex items-center gap-2">
                     Tren Kas 3 Bulan Terakhir
@@ -88,8 +93,9 @@
                 </div>
             </div>
 
+            <!-- Input Transaksi (KHUSUS ADMIN) -->
             <div class="admin-only glass-card p-5 rounded-3xl shadow-lg bg-white border-2 border-blue-50">
-                <h2 class="text-lg font-bold mb-4 text-gray-800">Input Transaksi (Admin)</h2>
+                <h2 class="text-lg font-bold mb-4 text-gray-800">Catat Transaksi (Admin)</h2>
                 <form id="transaksi-form" class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div class="col-span-1">
@@ -106,15 +112,15 @@
                     </div>
                     
                     <div id="warga-select-container">
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nama Warga</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nama Warga & Blok</label>
                         <select id="pilih-warga" class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
                             <option value="">-- Pilih Warga --</option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Keterangan</label>
-                        <input type="text" id="ket" placeholder="Contoh: Iuran Sampah" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Keterangan Tambahan</label>
+                        <input type="text" id="ket" placeholder="Contoh: Iuran Keamanan Bulan Mei" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
                     </div>
 
                     <div>
@@ -126,11 +132,12 @@
                 </form>
             </div>
 
+            <!-- Riwayat Transaksi -->
             <div>
                 <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-lg font-bold text-gray-800">Riwayat Kas Eternity</h2>
+                    <h2 class="text-lg font-bold text-gray-800">Riwayat Kas</h2>
                     <button onclick="downloadLaporanExcel()" class="bg-green-50 text-green-700 px-3 py-2 rounded-xl text-xs font-bold border border-green-100 flex items-center gap-1">
-                        Ekspor Excel
+                        Ekspor Laporan
                     </button>
                 </div>
                 <div id="daftar-transaksi" class="space-y-3"></div>
@@ -140,22 +147,24 @@
             </div>
         </div>
 
+        <!-- KONTEN WARGA -->
         <div id="content-warga" class="hidden space-y-6">
+            <!-- Registrasi Warga (KHUSUS ADMIN) -->
             <div class="admin-only glass-card p-5 rounded-3xl shadow-sm bg-white border-2 border-blue-50">
-                <h2 class="text-lg font-bold mb-4 text-gray-800">Tambah Warga (Admin)</h2>
+                <h2 class="text-lg font-bold mb-4 text-gray-800">Tambah Warga & Blok (Admin)</h2>
                 <form id="warga-form" class="space-y-4">
-                    <input type="text" id="warga-nama" placeholder="Nama Lengkap" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
-                    <input type="text" id="warga-alamat" placeholder="Alamat (Contoh: No. 12)" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                    <input type="text" id="warga-nama" placeholder="Nama Lengkap Warga" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                    <input type="text" id="warga-alamat" placeholder="Blok Rumah (Contoh: A1/10)" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
                     <select id="warga-status" class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
                         <option value="Pemilik">Status: Pemilik</option>
                         <option value="Kontrak">Status: Kontrak</option>
                     </select>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl active:scale-95 transition">Tambah Warga</button>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl active:scale-95 transition">Tambah ke Database</button>
                 </form>
             </div>
 
             <div class="flex justify-between items-center px-1">
-                <h2 class="text-lg font-bold text-gray-800">Daftar Warga Cluster Eternity</h2>
+                <h2 class="text-lg font-bold text-gray-800">Daftar Warga Cluster</h2>
                 <span id="counter-warga" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">0 Warga</span>
             </div>
             
@@ -163,10 +172,11 @@
         </div>
     </div>
 
+    <!-- Modals -->
     <div id="login-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[100] px-6">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8">
-            <h3 class="text-xl font-black text-gray-800 mb-2">Login Admin</h3>
-            <p class="text-sm text-gray-500 mb-6">Password default: <span class="font-bold">admin123</span></p>
+            <h3 class="text-xl font-black text-gray-800 mb-2">Login Admin Cluster</h3>
+            <p class="text-sm text-gray-500 mb-6">Gunakan password yang telah disepakati.</p>
             <input type="password" id="admin-password-input" placeholder="••••••••" class="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none mb-6 text-center text-2xl tracking-widest">
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="closeLoginModal()" class="py-4 rounded-2xl font-bold text-gray-500 bg-gray-100">Batal</button>
@@ -177,7 +187,7 @@
 
     <div id="change-password-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[100] px-6">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8">
-            <h3 class="text-xl font-black text-gray-800 mb-4">Ganti Password</h3>
+            <h3 class="text-xl font-black text-gray-800 mb-4">Ganti Password Admin</h3>
             <div class="space-y-3 mb-6">
                 <input type="password" id="old-pass" placeholder="Password Lama" class="w-full px-4 py-3 border rounded-xl">
                 <input type="password" id="new-pass" placeholder="Password Baru" class="w-full px-4 py-3 border rounded-xl">
@@ -196,11 +206,10 @@
     </div>
 
     <script>
-        // Menggunakan nama storage yang lebih spesifik untuk Cluster Eternity
-        let dataTransaksi = JSON.parse(localStorage.getItem('eternity_kas_data')) || [];
-        let dataWarga = JSON.parse(localStorage.getItem('eternity_warga_data')) || [];
-        let adminPassword = localStorage.getItem('eternity_admin_password') || 'admin123';
-        let isAdmin = sessionStorage.getItem('eternity_is_admin') === 'true';
+        let dataTransaksi = JSON.parse(localStorage.getItem('kas_eternity_data')) || [];
+        let dataWarga = JSON.parse(localStorage.getItem('warga_eternity_data')) || [];
+        let adminPassword = localStorage.getItem('admin_eternity_password') || 'admin123';
+        let isAdmin = sessionStorage.getItem('is_admin_eternity') === 'true';
         let trenChart;
 
         window.onload = () => {
@@ -231,12 +240,12 @@
             const val = document.getElementById('admin-password-input').value;
             if (val === adminPassword) {
                 isAdmin = true;
-                sessionStorage.setItem('eternity_is_admin', 'true');
+                sessionStorage.setItem('is_admin_eternity', 'true');
                 applyAdminTheme();
                 renderData();
                 renderWarga();
                 closeLoginModal();
-                showAlert('Berhasil sebagai Admin');
+                showAlert('Login Admin Cluster Berhasil');
             } else {
                 showAlert('Password Salah!', 'bg-red-600');
             }
@@ -245,7 +254,7 @@
 
         function logoutAdmin() {
             isAdmin = false;
-            sessionStorage.removeItem('eternity_is_admin');
+            sessionStorage.removeItem('is_admin_eternity');
             applyAdminTheme();
             renderData();
             renderWarga();
@@ -266,7 +275,7 @@
 
         function populateWargaDropdown() {
             const s = document.getElementById('pilih-warga');
-            s.innerHTML = '<option value="">-- Pilih Warga --</option>';
+            s.innerHTML = '<option value="">-- Pilih Warga Cluster --</option>';
             dataWarga.forEach(w => {
                 const o = document.createElement('option');
                 o.value = JSON.stringify({n: w.nama, a: w.alamat});
@@ -280,7 +289,7 @@
             if(!isAdmin) return;
             const j = document.getElementById('jenis').value;
             const wv = document.getElementById('pilih-warga').value;
-            let n = 'Umum', a = '-';
+            let n = 'Warga Umum', a = '-';
             if(j==='pemasukan' && wv) { const p = JSON.parse(wv); n=p.n; a=p.a; }
 
             dataTransaksi.push({
@@ -292,7 +301,7 @@
                 jenis: j,
                 jumlah: parseFloat(document.getElementById('jumlah').value)
             });
-            saveData(); renderData(); e.target.reset(); toggleWargaSelect(); showAlert('Transaksi Disimpan');
+            saveData(); renderData(); e.target.reset(); toggleWargaSelect(); showAlert('Transaksi Cluster Disimpan');
         });
 
         document.getElementById('warga-form').addEventListener('submit', (e) => {
@@ -304,7 +313,7 @@
                 alamat: document.getElementById('warga-alamat').value,
                 status: document.getElementById('warga-status').value
             });
-            saveWarga(); renderWarga(); populateWargaDropdown(); e.target.reset(); showAlert('Warga Terdaftar');
+            saveWarga(); renderWarga(); populateWargaDropdown(); e.target.reset(); showAlert('Warga Berhasil Ditambahkan');
         });
 
         function renderData() {
@@ -324,7 +333,8 @@
                             <span class="text-[8px] font-black px-1.5 py-0.5 rounded ${item.jenis==='pemasukan'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${item.jenis==='pemasukan'?'DEBIT':'KREDIT'}</span>
                         </div>
                         <span class="text-sm font-bold text-gray-800">${item.pembayar}</span>
-                        <span class="text-[11px] text-gray-500">${item.keterangan}</span>
+                        <span class="text-[10px] text-blue-600 font-bold -mt-1 mb-1">${item.alamat}</span>
+                        <span class="text-[11px] text-gray-500 italic">${item.keterangan}</span>
                     </div>
                     <div class="text-right">
                         <span class="text-sm font-black ${item.jenis==='pemasukan'?'text-green-600':'text-red-600'}">${formatRupiah(item.jumlah)}</span>
@@ -344,14 +354,14 @@
         function renderWarga() {
             const l = document.getElementById('daftar-warga-list');
             l.innerHTML = '';
-            document.getElementById('counter-warga').innerText = `${dataWarga.length} Warga`;
+            document.getElementById('counter-warga').innerText = `${dataWarga.length} Warga Cluster`;
             dataWarga.forEach(w => {
                 const item = document.createElement('div');
                 item.className = "bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center";
                 item.innerHTML = `
                     <div>
                         <p class="text-sm font-bold">${w.nama}</p>
-                        <p class="text-xs text-gray-500">${w.alamat} • ${w.status}</p>
+                        <p class="text-xs text-gray-500">Blok ${w.alamat} • Status ${w.status}</p>
                     </div>
                     ${isAdmin ? `<button onclick="hapusWarga(${w.id})" class="text-red-400 p-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>` : ''}
                 `;
@@ -361,8 +371,8 @@
 
         function hapusKas(id) { if(isAdmin && confirm('Hapus transaksi ini?')) { dataTransaksi = dataTransaksi.filter(x=>x.id!==id); saveData(); renderData(); } }
         function hapusWarga(id) { if(isAdmin && confirm('Hapus data warga ini?')) { dataWarga = dataWarga.filter(x=>x.id!==id); saveWarga(); renderWarga(); populateWargaDropdown(); } }
-        function saveData() { localStorage.setItem('eternity_kas_data', JSON.stringify(dataTransaksi)); }
-        function saveWarga() { localStorage.setItem('eternity_warga_data', JSON.stringify(dataWarga)); }
+        function saveData() { localStorage.setItem('kas_eternity_data', JSON.stringify(dataTransaksi)); }
+        function saveWarga() { localStorage.setItem('warga_eternity_data', JSON.stringify(dataWarga)); }
         function formatRupiah(n) { return 'Rp' + n.toLocaleString('id-ID'); }
         function showAlert(m, c='bg-gray-900') {
             const b = document.getElementById('custom-alert');
@@ -410,27 +420,12 @@
                 const d = t.jenis==='pemasukan'?t.jumlah:0;
                 const k = t.jenis==='pengeluaran'?t.jumlah:0;
                 bal += (d-k);
-                return { 'No': idx+1, 'Tanggal': t.tanggal, 'Nama': t.pembayar, 'Keterangan': t.keterangan, 'Debit': d, 'Kredit': k, 'Saldo': bal };
+                return { 'No': idx+1, 'Tanggal': t.tanggal, 'Warga': t.pembayar, 'Blok': t.alamat, 'Keterangan': t.keterangan, 'Debit': d, 'Kredit': k, 'Saldo': bal };
             });
             const ws = XLSX.utils.json_to_sheet(rows);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Kas_Eternity");
-            XLSX.writeFile(wb, "Laporan_Kas_Eternity.xlsx");
-        }
-
-        function showChangePasswordModal() { document.getElementById('change-password-modal').classList.replace('hidden', 'flex'); }
-        function closeChangePasswordModal() { document.getElementById('change-password-modal').classList.replace('flex', 'hidden'); }
-        function updateAdminPassword() {
-            const oldP = document.getElementById('old-pass').value;
-            const newP = document.getElementById('new-pass').value;
-            if(oldP === adminPassword && newP.length > 0) {
-                adminPassword = newP;
-                localStorage.setItem('eternity_admin_password', newP);
-                showAlert('Password Diganti');
-                closeChangePasswordModal();
-            } else {
-                showAlert('Gagal Ganti Password', 'bg-red-600');
-            }
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan_Cluster_Eternity");
+            XLSX.writeFile(wb, "Laporan_Kas_Cluster_Eternity.xlsx");
         }
     </script>
 </body>
