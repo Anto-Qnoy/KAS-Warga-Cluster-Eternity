@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistem Kas RT Digital</title>
+    <title>Kas Warga Cluster Eternity</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -28,12 +28,11 @@
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased pb-12">
     <div id="main-container" class="max-w-md mx-auto md:max-w-5xl px-4 pt-6 md:pt-12">
-        <!-- Header -->
         <header class="mb-6">
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h1 class="text-2xl md:text-3xl font-extrabold text-blue-900 tracking-tight">Kas RT Digital</h1>
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-blue-900 tracking-tight">Kas Warga Cluster Eternity</h1>
                         <p class="text-sm text-gray-500">Laporan Transaksi & Data Warga</p>
                     </div>
                     <div id="admin-status">
@@ -57,7 +56,6 @@
                     </div>
                 </div>
 
-                <!-- Tab Navigation -->
                 <nav class="flex bg-white p-1 rounded-2xl shadow-sm border border-gray-100 sticky top-2 z-40">
                     <button onclick="switchTab('kas')" id="tab-kas" class="flex-1 py-3 text-sm font-bold rounded-xl transition nav-link active">Keuangan</button>
                     <button onclick="switchTab('warga')" id="tab-warga" class="flex-1 py-3 text-sm font-bold rounded-xl transition nav-link text-gray-500">Warga</button>
@@ -65,9 +63,7 @@
             </div>
         </header>
 
-        <!-- KONTEN KAS -->
         <div id="content-kas" class="space-y-6">
-            <!-- Ringkasan Saldo -->
             <div class="flex overflow-x-auto gap-4 pb-2 snap-x">
                 <div class="min-w-[80%] md:min-w-0 md:flex-1 bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500 snap-center">
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Debit</p>
@@ -83,7 +79,6 @@
                 </div>
             </div>
 
-            <!-- Grafik Tren -->
             <div class="glass-card p-5 rounded-2xl shadow-sm bg-white border border-gray-100">
                 <h3 class="text-sm font-bold mb-4 text-gray-800 flex items-center gap-2">
                     Tren Kas 3 Bulan Terakhir
@@ -93,7 +88,6 @@
                 </div>
             </div>
 
-            <!-- Input Transaksi (KHUSUS ADMIN) -->
             <div class="admin-only glass-card p-5 rounded-3xl shadow-lg bg-white border-2 border-blue-50">
                 <h2 class="text-lg font-bold mb-4 text-gray-800">Input Transaksi (Admin)</h2>
                 <form id="transaksi-form" class="space-y-4">
@@ -132,10 +126,9 @@
                 </form>
             </div>
 
-            <!-- Riwayat Transaksi -->
             <div>
                 <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-lg font-bold text-gray-800">Riwayat Kas</h2>
+                    <h2 class="text-lg font-bold text-gray-800">Riwayat Kas Eternity</h2>
                     <button onclick="downloadLaporanExcel()" class="bg-green-50 text-green-700 px-3 py-2 rounded-xl text-xs font-bold border border-green-100 flex items-center gap-1">
                         Ekspor Excel
                     </button>
@@ -147,9 +140,7 @@
             </div>
         </div>
 
-        <!-- KONTEN WARGA -->
         <div id="content-warga" class="hidden space-y-6">
-            <!-- Registrasi Warga (KHUSUS ADMIN) -->
             <div class="admin-only glass-card p-5 rounded-3xl shadow-sm bg-white border-2 border-blue-50">
                 <h2 class="text-lg font-bold mb-4 text-gray-800">Tambah Warga (Admin)</h2>
                 <form id="warga-form" class="space-y-4">
@@ -164,7 +155,7 @@
             </div>
 
             <div class="flex justify-between items-center px-1">
-                <h2 class="text-lg font-bold text-gray-800">Daftar Warga</h2>
+                <h2 class="text-lg font-bold text-gray-800">Daftar Warga Cluster Eternity</h2>
                 <span id="counter-warga" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">0 Warga</span>
             </div>
             
@@ -172,7 +163,6 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="login-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[100] px-6">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8">
             <h3 class="text-xl font-black text-gray-800 mb-2">Login Admin</h3>
@@ -206,10 +196,11 @@
     </div>
 
     <script>
-        let dataTransaksi = JSON.parse(localStorage.getItem('kas_rt_data')) || [];
-        let dataWarga = JSON.parse(localStorage.getItem('warga_rt_data')) || [];
-        let adminPassword = localStorage.getItem('admin_rt_password') || 'admin123';
-        let isAdmin = sessionStorage.getItem('is_admin_rt') === 'true';
+        // Menggunakan nama storage yang lebih spesifik untuk Cluster Eternity
+        let dataTransaksi = JSON.parse(localStorage.getItem('eternity_kas_data')) || [];
+        let dataWarga = JSON.parse(localStorage.getItem('eternity_warga_data')) || [];
+        let adminPassword = localStorage.getItem('eternity_admin_password') || 'admin123';
+        let isAdmin = sessionStorage.getItem('eternity_is_admin') === 'true';
         let trenChart;
 
         window.onload = () => {
@@ -240,7 +231,7 @@
             const val = document.getElementById('admin-password-input').value;
             if (val === adminPassword) {
                 isAdmin = true;
-                sessionStorage.setItem('is_admin_rt', 'true');
+                sessionStorage.setItem('eternity_is_admin', 'true');
                 applyAdminTheme();
                 renderData();
                 renderWarga();
@@ -254,7 +245,7 @@
 
         function logoutAdmin() {
             isAdmin = false;
-            sessionStorage.removeItem('is_admin_rt');
+            sessionStorage.removeItem('eternity_is_admin');
             applyAdminTheme();
             renderData();
             renderWarga();
@@ -368,10 +359,10 @@
             });
         }
 
-        function hapusKas(id) { if(isAdmin && confirm('Hapus?')) { dataTransaksi = dataTransaksi.filter(x=>x.id!==id); saveData(); renderData(); } }
-        function hapusWarga(id) { if(isAdmin && confirm('Hapus?')) { dataWarga = dataWarga.filter(x=>x.id!==id); saveWarga(); renderWarga(); populateWargaDropdown(); } }
-        function saveData() { localStorage.setItem('kas_rt_data', JSON.stringify(dataTransaksi)); }
-        function saveWarga() { localStorage.setItem('warga_rt_data', JSON.stringify(dataWarga)); }
+        function hapusKas(id) { if(isAdmin && confirm('Hapus transaksi ini?')) { dataTransaksi = dataTransaksi.filter(x=>x.id!==id); saveData(); renderData(); } }
+        function hapusWarga(id) { if(isAdmin && confirm('Hapus data warga ini?')) { dataWarga = dataWarga.filter(x=>x.id!==id); saveWarga(); renderWarga(); populateWargaDropdown(); } }
+        function saveData() { localStorage.setItem('eternity_kas_data', JSON.stringify(dataTransaksi)); }
+        function saveWarga() { localStorage.setItem('eternity_warga_data', JSON.stringify(dataWarga)); }
         function formatRupiah(n) { return 'Rp' + n.toLocaleString('id-ID'); }
         function showAlert(m, c='bg-gray-900') {
             const b = document.getElementById('custom-alert');
@@ -423,8 +414,23 @@
             });
             const ws = XLSX.utils.json_to_sheet(rows);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Kas_RT");
-            XLSX.writeFile(wb, "Laporan_Kas_RT.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "Kas_Eternity");
+            XLSX.writeFile(wb, "Laporan_Kas_Eternity.xlsx");
+        }
+
+        function showChangePasswordModal() { document.getElementById('change-password-modal').classList.replace('hidden', 'flex'); }
+        function closeChangePasswordModal() { document.getElementById('change-password-modal').classList.replace('flex', 'hidden'); }
+        function updateAdminPassword() {
+            const oldP = document.getElementById('old-pass').value;
+            const newP = document.getElementById('new-pass').value;
+            if(oldP === adminPassword && newP.length > 0) {
+                adminPassword = newP;
+                localStorage.setItem('eternity_admin_password', newP);
+                showAlert('Password Diganti');
+                closeChangePasswordModal();
+            } else {
+                showAlert('Gagal Ganti Password', 'bg-red-600');
+            }
         }
     </script>
 </body>
