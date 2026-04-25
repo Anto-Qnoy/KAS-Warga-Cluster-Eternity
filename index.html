@@ -15,7 +15,7 @@
             -webkit-tap-highlight-color: transparent;
         }
         .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .chart-container { position: relative; height: 200px; width: 100%; }
+        .chart-container { position: relative; height: 180px; width: 100%; }
         .nav-link.active { border-bottom: 3px solid #1e40af; color: #1e40af; font-weight: 700; }
         
         ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -24,32 +24,48 @@
         .admin-only { display: none !important; }
         .is-admin .admin-only { display: block !important; }
         .is-admin .admin-only-flex { display: flex !important; }
+        
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .rekening-badge {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased pb-12">
+    <div id="loading-overlay">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
+        <p class="font-bold text-gray-500">Sinkronisasi Cloud...</p>
+    </div>
+
     <div id="main-container" class="max-w-md mx-auto md:max-w-5xl px-4 pt-6 md:pt-12">
-        <!-- Header -->
         <header class="mb-6">
             <div class="flex flex-col gap-4">
                 <div class="flex justify-between items-start">
                     <div>
                         <h1 class="text-2xl md:text-3xl font-extrabold text-blue-900 tracking-tight">Cluster Eternity</h1>
-                        <p class="text-sm text-gray-500">Sistem Manajemen Kas & Iuran Warga</p>
+                        <p class="text-sm text-gray-500 font-medium">Manajemen Kas & Iuran Warga</p>
+                        <div id="user-info-display" class="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-tighter"></div>
                     </div>
                     <div id="admin-status">
-                        <button id="btn-login-admin" onclick="showLoginModal()" class="bg-white border border-gray-200 text-gray-700 p-2 rounded-xl shadow-sm hover:bg-gray-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <button id="btn-login-admin" onclick="showLoginModal()" class="bg-white border border-gray-200 text-gray-700 p-2.5 rounded-2xl shadow-sm hover:bg-gray-50 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                             </svg>
                         </button>
                         <div id="admin-logged-in-actions" class="hidden flex gap-2">
-                            <button onclick="showChangePasswordModal()" class="bg-blue-50 text-blue-600 p-2 rounded-xl border border-blue-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                </svg>
-                            </button>
-                            <button onclick="logoutAdmin()" class="bg-red-50 text-red-600 p-2 rounded-xl border border-red-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <button onclick="logoutAdmin()" class="bg-red-50 text-red-600 p-2.5 rounded-2xl border border-red-100 shadow-sm transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                                 </svg>
                             </button>
@@ -57,7 +73,6 @@
                     </div>
                 </div>
 
-                <!-- Tab Navigation -->
                 <nav class="flex bg-white p-1 rounded-2xl shadow-sm border border-gray-100 sticky top-2 z-40">
                     <button onclick="switchTab('kas')" id="tab-kas" class="flex-1 py-3 text-sm font-bold rounded-xl transition nav-link active">Keuangan</button>
                     <button onclick="switchTab('warga')" id="tab-warga" class="flex-1 py-3 text-sm font-bold rounded-xl transition nav-link text-gray-500">Data Warga</button>
@@ -65,42 +80,76 @@
             </div>
         </header>
 
-        <!-- KONTEN KAS -->
         <div id="content-kas" class="space-y-6">
-            <!-- Ringkasan Saldo -->
-            <div class="flex overflow-x-auto gap-4 pb-2 snap-x">
-                <div class="min-w-[80%] md:min-w-0 md:flex-1 bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500 snap-center">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Debit</p>
-                    <p id="total-pemasukan" class="text-xl font-bold text-green-600 mt-1">Rp 0</p>
+            <!-- Informasi Rekening (Public View) -->
+            <div id="rekening-display" class="rekening-badge p-5 rounded-3xl shadow-lg text-white relative overflow-hidden">
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-[10px] font-bold uppercase tracking-widest opacity-80">Rekening Tujuan Iuran</span>
+                        <button onclick="copyRekening()" class="bg-white/20 hover:bg-white/30 p-1.5 rounded-lg transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                            </svg>
+                        </button>
+                    </div>
+                    <p id="rek-bank" class="text-xs font-medium opacity-90">Bank -</p>
+                    <p id="rek-nomor" class="text-2xl font-black tracking-wider my-1">0000 0000 00</p>
+                    <p id="rek-nama" class="text-sm font-bold uppercase">Nama Pemilik</p>
                 </div>
-                <div class="min-w-[80%] md:min-w-0 md:flex-1 bg-white p-5 rounded-2xl shadow-sm border-l-4 border-red-500 snap-center">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Kredit</p>
-                    <p id="total-pengeluaran" class="text-xl font-bold text-red-600 mt-1">Rp 0</p>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                <!-- Admin Edit Rekening Toggle -->
+                <button onclick="showRekeningForm()" class="admin-only absolute top-4 right-12 bg-yellow-400 text-blue-900 p-1.5 rounded-lg text-[10px] font-black">EDIT REK</button>
+            </div>
+
+            <!-- Form Edit Rekening (Hidden by Default) -->
+            <div id="rekening-edit-container" class="hidden admin-only glass-card p-5 rounded-3xl border-2 border-yellow-200 bg-yellow-50/50">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-yellow-800">Pengaturan Rekening Admin</h3>
+                    <button onclick="hideRekeningForm()" class="text-gray-400 hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
                 </div>
-                <div class="min-w-[80%] md:min-w-0 md:flex-1 bg-blue-600 p-5 rounded-2xl shadow-md border-l-4 border-blue-400 snap-center">
-                    <p class="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Saldo Akhir</p>
-                    <p id="saldo-akhir" class="text-xl font-bold text-white mt-1">Rp 0</p>
+                <div class="space-y-3">
+                    <input type="text" id="edit-rek-bank" placeholder="Nama Bank (Contoh: BCA)" class="w-full px-4 py-3 rounded-xl border border-yellow-200 outline-none text-sm">
+                    <input type="text" id="edit-rek-nomor" placeholder="Nomor Rekening" class="w-full px-4 py-3 rounded-xl border border-yellow-200 outline-none text-sm">
+                    <input type="text" id="edit-rek-nama" placeholder="Atas Nama" class="w-full px-4 py-3 rounded-xl border border-yellow-200 outline-none text-sm">
+                    <button onclick="saveRekening()" class="w-full bg-yellow-500 text-white font-bold py-3 rounded-xl shadow-md">Simpan Perubahan Rekening</button>
                 </div>
             </div>
 
-            <!-- Grafik Tren -->
-            <div class="glass-card p-5 rounded-2xl shadow-sm bg-white border border-gray-100">
-                <h3 class="text-sm font-bold mb-4 text-gray-800 flex items-center gap-2">
-                    Tren Kas 3 Bulan Terakhir
-                </h3>
+            <!-- Ringkasan Saldo -->
+            <div class="flex overflow-x-auto gap-4 pb-2 snap-x">
+                <div class="min-w-[80%] md:min-w-0 md:flex-1 bg-white p-5 rounded-3xl shadow-sm border-l-4 border-green-500 snap-center">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Debit</p>
+                    <p id="total-pemasukan" class="text-xl font-bold text-green-600 mt-1">Rp 0</p>
+                </div>
+                <div class="min-w-[80%] md:min-w-0 md:flex-1 bg-white p-5 rounded-3xl shadow-sm border-l-4 border-red-500 snap-center">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Kredit</p>
+                    <p id="total-pengeluaran" class="text-xl font-bold text-red-600 mt-1">Rp 0</p>
+                </div>
+                <div class="min-w-[80%] md:min-w-0 md:flex-1 bg-blue-50 p-5 rounded-3xl shadow-sm border-l-4 border-blue-600 snap-center">
+                    <p class="text-[10px] text-blue-400 font-bold uppercase tracking-wider">Saldo Akhir</p>
+                    <p id="saldo-akhir" class="text-xl font-bold text-blue-900 mt-1">Rp 0</p>
+                </div>
+            </div>
+
+            <div class="glass-card p-5 rounded-3xl shadow-sm bg-white border border-gray-100">
+                <h3 class="text-sm font-bold mb-4 text-gray-800 flex items-center gap-2">Grafik Arus Kas</h3>
                 <div class="chart-container">
                     <canvas id="trenChart"></canvas>
                 </div>
             </div>
 
-            <!-- Input Transaksi (KHUSUS ADMIN) -->
             <div class="admin-only glass-card p-5 rounded-3xl shadow-lg bg-white border-2 border-blue-50">
-                <h2 class="text-lg font-bold mb-4 text-gray-800">Catat Transaksi (Admin)</h2>
+                <h2 id="form-title" class="text-lg font-bold mb-4 text-gray-800">Catat Transaksi</h2>
                 <form id="transaksi-form" class="space-y-4">
+                    <input type="hidden" id="edit-id">
                     <div class="grid grid-cols-2 gap-3">
                         <div class="col-span-1">
                             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tanggal</label>
-                            <input type="date" id="tgl" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                            <input type="date" id="tgl" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-400">
                         </div>
                         <div class="col-span-1">
                             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tipe</label>
@@ -119,52 +168,50 @@
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Keterangan Tambahan</label>
-                        <input type="text" id="ket" placeholder="Contoh: Iuran Keamanan Bulan Mei" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Keterangan</label>
+                        <input type="text" id="ket" placeholder="Contoh: Iuran Keamanan Bulan Mei" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-400">
                     </div>
 
                     <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nominal (Rp)</label>
-                        <input type="number" id="jumlah" placeholder="0" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-lg font-bold text-blue-700 outline-none">
+                        <input type="text" id="jumlah-display" placeholder="0" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-lg font-bold text-blue-700 outline-none">
+                        <input type="hidden" id="jumlah-asli">
                     </div>
 
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition">Simpan Transaksi</button>
+                    <div class="flex gap-2">
+                        <button type="button" id="btn-cancel-edit" onclick="resetForm()" class="hidden flex-1 bg-gray-100 text-gray-600 font-bold py-4 rounded-2xl transition">Batal</button>
+                        <button type="submit" id="btn-submit" class="flex-[2] bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition">Simpan Transaksi</button>
+                    </div>
                 </form>
             </div>
 
-            <!-- Riwayat Transaksi -->
             <div>
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="text-lg font-bold text-gray-800">Riwayat Kas</h2>
-                    <button onclick="downloadLaporanExcel()" class="bg-green-50 text-green-700 px-3 py-2 rounded-xl text-xs font-bold border border-green-100 flex items-center gap-1">
-                        Ekspor Laporan
-                    </button>
+                    <button onclick="downloadLaporanExcel()" class="bg-green-50 text-green-700 px-3 py-2 rounded-xl text-xs font-bold border border-green-100 flex items-center gap-1">Ekspor Excel</button>
                 </div>
                 <div id="daftar-transaksi" class="space-y-3"></div>
-                <div id="no-data" class="bg-white p-10 rounded-3xl text-center text-gray-400 border border-dashed border-gray-200">
-                    Belum ada riwayat transaksi.
-                </div>
+                <div id="no-data" class="bg-white p-10 rounded-3xl text-center text-gray-400 border border-dashed border-gray-200 hidden">Belum ada riwayat transaksi.</div>
             </div>
         </div>
 
-        <!-- KONTEN WARGA -->
         <div id="content-warga" class="hidden space-y-6">
-            <!-- Registrasi Warga (KHUSUS ADMIN) -->
+            <!-- Form Warga -->
             <div class="admin-only glass-card p-5 rounded-3xl shadow-sm bg-white border-2 border-blue-50">
-                <h2 class="text-lg font-bold mb-4 text-gray-800">Tambah Warga & Blok (Admin)</h2>
+                <h2 class="text-lg font-bold mb-4 text-gray-800 tracking-tight">Tambah Warga & Blok</h2>
                 <form id="warga-form" class="space-y-4">
-                    <input type="text" id="warga-nama" placeholder="Nama Lengkap Warga" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
-                    <input type="text" id="warga-alamat" placeholder="Blok Rumah (Contoh: A1/10)" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
+                    <input type="text" id="warga-nama" placeholder="Nama Lengkap Warga" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-400">
+                    <input type="text" id="warga-alamat" placeholder="Blok Rumah (Contoh: A1/10)" required class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-400">
                     <select id="warga-status" class="w-full px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none">
                         <option value="Pemilik">Status: Pemilik</option>
                         <option value="Kontrak">Status: Kontrak</option>
                     </select>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl active:scale-95 transition">Tambah ke Database</button>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl active:scale-95 transition">Simpan Data Warga</button>
                 </form>
             </div>
 
             <div class="flex justify-between items-center px-1">
-                <h2 class="text-lg font-bold text-gray-800">Daftar Warga Cluster</h2>
+                <h2 class="text-lg font-bold text-gray-800">Daftar Warga</h2>
                 <span id="counter-warga" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">0 Warga</span>
             </div>
             
@@ -172,11 +219,11 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[100] px-6">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-sm:p-6 p-8 max-w-sm">
             <h3 class="text-xl font-black text-gray-800 mb-2">Login Admin Cluster</h3>
-            <p class="text-sm text-gray-500 mb-6">Gunakan password yang telah disepakati.</p>
+            <p class="text-sm text-gray-500 mb-6">Masukkan kode akses pengurus.</p>
             <input type="password" id="admin-password-input" placeholder="••••••••" class="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none mb-6 text-center text-2xl tracking-widest">
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="closeLoginModal()" class="py-4 rounded-2xl font-bold text-gray-500 bg-gray-100">Batal</button>
@@ -185,39 +232,266 @@
         </div>
     </div>
 
-    <div id="change-password-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[100] px-6">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8">
-            <h3 class="text-xl font-black text-gray-800 mb-4">Ganti Password Admin</h3>
-            <div class="space-y-3 mb-6">
-                <input type="password" id="old-pass" placeholder="Password Lama" class="w-full px-4 py-3 border rounded-xl">
-                <input type="password" id="new-pass" placeholder="Password Baru" class="w-full px-4 py-3 border rounded-xl">
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="closeChangePasswordModal()" class="py-4 font-bold text-gray-500">Batal</button>
-                <button onclick="updateAdminPassword()" class="py-4 font-bold text-white bg-blue-600 rounded-xl">Simpan</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="custom-alert" class="fixed bottom-8 left-1/2 -translate-x-1/2 hidden z-50 w-[90%] max-w-xs">
+    <!-- Custom Alert -->
+    <div id="custom-alert" class="fixed bottom-8 left-1/2 -translate-x-1/2 hidden z-[200] w-[90%] max-w-xs">
         <div id="alert-bg" class="bg-gray-900 text-white px-6 py-4 rounded-2xl text-center text-sm font-bold shadow-2xl">
             <span id="alert-msg"></span>
         </div>
     </div>
 
-    <script>
-        let dataTransaksi = JSON.parse(localStorage.getItem('kas_eternity_data')) || [];
-        let dataWarga = JSON.parse(localStorage.getItem('warga_eternity_data')) || [];
-        let adminPassword = localStorage.getItem('admin_eternity_password') || 'admin123';
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, getDoc, setDoc, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'cluster-eternity-v2';
+
+        const PATH_TRANS = `artifacts/${appId}/public/data/transaksi`;
+        const PATH_WARGA = `artifacts/${appId}/public/data/warga`;
+        const PATH_SETTINGS = `artifacts/${appId}/public/data/settings`;
+
+        let dataTransaksi = [];
+        let dataWarga = [];
+        let dataSettings = {};
         let isAdmin = sessionStorage.getItem('is_admin_eternity') === 'true';
         let trenChart;
+        let currentUser = null;
 
-        window.onload = () => {
+        const init = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth failed", err);
+                showAlert("Gagal menyambung ke cloud", "bg-red-600");
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('user-info-display').innerText = `SESSION ID: ${user.uid.substring(0,10)}...`;
+                setupListeners();
+                setupCurrencyInput();
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+        });
+
+        function setupListeners() {
+            if (!currentUser) return;
+            
+            // Listen Transaksi
+            onSnapshot(collection(db, PATH_TRANS), (snapshot) => {
+                dataTransaksi = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderData();
+            }, (err) => console.error(err));
+            
+            // Listen Warga
+            onSnapshot(collection(db, PATH_WARGA), (snapshot) => {
+                dataWarga = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderWarga();
+                populateWargaDropdown();
+            }, (err) => console.error(err));
+
+            // Listen Settings (Rekening)
+            onSnapshot(doc(db, PATH_SETTINGS, "rekening"), (docSnap) => {
+                if (docSnap.exists()) {
+                    dataSettings = docSnap.data();
+                    updateRekeningDisplay();
+                } else {
+                    // Default values if not exist
+                    dataSettings = { bank: "BANK CONTOH", nomor: "0000 0000 00", nama: "NAMA BENDAHARA" };
+                    updateRekeningDisplay();
+                }
+            }, (err) => console.error(err));
+        }
+
+        function updateRekeningDisplay() {
+            document.getElementById('rek-bank').innerText = dataSettings.bank || "BANK BELUM DIATUR";
+            document.getElementById('rek-nomor').innerText = dataSettings.nomor || "0000 0000 00";
+            document.getElementById('rek-nama').innerText = dataSettings.nama || "NAMA PEMILIK";
+            
+            // Populate form if admin
+            document.getElementById('edit-rek-bank').value = dataSettings.bank || "";
+            document.getElementById('edit-rek-nomor').value = dataSettings.nomor || "";
+            document.getElementById('edit-rek-nama').value = dataSettings.nama || "";
+        }
+
+        window.copyRekening = () => {
+            const rek = document.getElementById('rek-nomor').innerText;
+            const tempInput = document.createElement("input");
+            tempInput.value = rek.replace(/\s/g, '');
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            showAlert("Nomor rekening berhasil disalin!");
+        };
+
+        window.showRekeningForm = () => {
+            document.getElementById('rekening-edit-container').classList.remove('hidden');
+        };
+
+        window.hideRekeningForm = () => {
+            document.getElementById('rekening-edit-container').classList.add('hidden');
+        };
+
+        window.saveRekening = async () => {
+            if (!isAdmin) return;
+            const bank = document.getElementById('edit-rek-bank').value;
+            const nomor = document.getElementById('edit-rek-nomor').value;
+            const nama = document.getElementById('edit-rek-nama').value;
+            
+            try {
+                await setDoc(doc(db, PATH_SETTINGS, "rekening"), { bank, nomor, nama });
+                showAlert("Rekening Berhasil Diperbarui");
+                hideRekeningForm();
+            } catch (e) {
+                showAlert("Gagal memperbarui rekening", "bg-red-600");
+            }
+        };
+
+        function setupCurrencyInput() {
+            const display = document.getElementById('jumlah-display');
+            const actual = document.getElementById('jumlah-asli');
+            display.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9]/g, '');
+                if (value) {
+                    actual.value = value;
+                    display.value = parseInt(value).toLocaleString('id-ID');
+                } else {
+                    actual.value = '';
+                    display.value = '';
+                }
+            });
+        }
+
+        window.showLoginModal = () => document.getElementById('login-modal').classList.replace('hidden', 'flex');
+        window.closeLoginModal = () => document.getElementById('login-modal').classList.replace('flex', 'hidden');
+
+        window.loginAdmin = () => {
+            const pass = document.getElementById('admin-password-input').value;
+            if (pass === '1234') {
+                isAdmin = true;
+                sessionStorage.setItem('is_admin_eternity', 'true');
+                applyAdminTheme();
+                renderData();
+                renderWarga();
+                closeLoginModal();
+                showAlert('Login Admin Berhasil');
+            } else {
+                showAlert('Password Salah!', 'bg-red-600');
+            }
+            document.getElementById('admin-password-input').value = '';
+        };
+
+        window.logoutAdmin = () => {
+            isAdmin = false;
+            sessionStorage.removeItem('is_admin_eternity');
             applyAdminTheme();
-            initCharts();
-            populateWargaDropdown();
             renderData();
             renderWarga();
+            showAlert('Logout Berhasil');
+        };
+
+        window.switchTab = (tab) => {
+            document.getElementById('content-kas').classList.toggle('hidden', tab !== 'kas');
+            document.getElementById('content-warga').classList.toggle('hidden', tab !== 'warga');
+            document.getElementById('tab-kas').classList.toggle('active', tab === 'kas');
+            document.getElementById('tab-warga').classList.toggle('active', tab === 'warga');
+        };
+
+        window.toggleWargaSelect = () => {
+            const j = document.getElementById('jenis').value;
+            document.getElementById('warga-select-container').style.display = (j === 'pemasukan' ? 'block' : 'none');
+        };
+
+        window.editKas = (id) => {
+            const item = dataTransaksi.find(t => t.id === id);
+            if (!item) return;
+
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('tgl').value = item.tanggal;
+            document.getElementById('jenis').value = item.jenis;
+            document.getElementById('ket').value = item.keterangan;
+            document.getElementById('jumlah-asli').value = item.jumlah;
+            document.getElementById('jumlah-display').value = item.jumlah.toLocaleString('id-ID');
+
+            toggleWargaSelect();
+
+            if (item.jenis === 'pemasukan') {
+                const wargaDropdown = document.getElementById('pilih-warga');
+                const matchingValue = Array.from(wargaDropdown.options).find(opt => {
+                    if (!opt.value) return false;
+                    const parsed = JSON.parse(opt.value);
+                    return parsed.n === item.pembayar && parsed.a === item.alamat;
+                });
+                if (matchingValue) wargaDropdown.value = matchingValue.value;
+            }
+
+            document.getElementById('form-title').innerText = "Edit Transaksi";
+            document.getElementById('btn-submit').innerText = "Update Transaksi";
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            
+            window.scrollTo({ top: 400, behavior: 'smooth' });
+        };
+
+        window.resetForm = () => {
+            document.getElementById('transaksi-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('jumlah-asli').value = '';
+            document.getElementById('form-title').innerText = "Catat Transaksi";
+            document.getElementById('btn-submit').innerText = "Simpan Transaksi";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            toggleWargaSelect();
+        };
+
+        window.hapusKas = async (id) => {
+            if (!isAdmin) return;
+            if (confirm('Hapus transaksi ini secara permanen dari cloud?')) {
+                try {
+                    await deleteDoc(doc(db, PATH_TRANS, id));
+                    showAlert('Transaksi dihapus');
+                } catch (e) { showAlert('Gagal menghapus', 'bg-red-600'); }
+            }
+        };
+
+        window.downloadLaporanExcel = () => {
+            const sorted = [...dataTransaksi].sort((a,b)=>new Date(a.tanggal)-new Date(b.tanggal));
+            const formatExcelCurrency = (val) => "Rp" + (val || 0).toLocaleString('id-ID');
+
+            const allContent = [
+                ["LAPORAN KAS WARGA CLUSTER ETERNITY"],
+                ["Dicetak pada: " + new Date().toLocaleString('id-ID')],
+                [],
+                ["No", "Tanggal", "Nama Warga", "Blok", "Keterangan", "Debit (Masuk)", "Kredit (Keluar)", "Saldo Akhir"]
+            ];
+            
+            let balance = 0, td = 0, tk = 0;
+            sorted.forEach((t, i) => {
+                const deb = t.jenis === 'pemasukan' ? t.jumlah : 0;
+                const kre = t.jenis === 'pengeluaran' ? t.jumlah : 0;
+                td += deb; tk += kre; balance += (deb - kre);
+                allContent.push([i+1, t.tanggal, t.pembayar, t.alamat, t.keterangan, formatExcelCurrency(deb), formatExcelCurrency(kre), formatExcelCurrency(balance)]);
+            });
+
+            allContent.push([], []);
+            allContent.push(["", "", "", "", "", "RINGKASAN"]);
+            allContent.push(["", "", "", "", "", "Total Debit:", formatExcelCurrency(td)]);
+            allContent.push(["", "", "", "", "", "Total Kredit:", formatExcelCurrency(tk)]);
+            allContent.push(["", "", "", "", "", "Saldo Akhir:", formatExcelCurrency(balance)]);
+
+            const ws = XLSX.utils.aoa_to_sheet(allContent);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Kas");
+            XLSX.writeFile(wb, `Laporan_Kas_${new Date().toISOString().split('T')[0]}.xlsx`);
         };
 
         function applyAdminTheme() {
@@ -233,50 +507,11 @@
             }
         }
 
-        function showLoginModal() { document.getElementById('login-modal').classList.replace('hidden', 'flex'); }
-        function closeLoginModal() { document.getElementById('login-modal').classList.replace('flex', 'hidden'); }
-        
-        function loginAdmin() {
-            const val = document.getElementById('admin-password-input').value;
-            if (val === adminPassword) {
-                isAdmin = true;
-                sessionStorage.setItem('is_admin_eternity', 'true');
-                applyAdminTheme();
-                renderData();
-                renderWarga();
-                closeLoginModal();
-                showAlert('Login Admin Cluster Berhasil');
-            } else {
-                showAlert('Password Salah!', 'bg-red-600');
-            }
-            document.getElementById('admin-password-input').value = '';
-        }
-
-        function logoutAdmin() {
-            isAdmin = false;
-            sessionStorage.removeItem('is_admin_eternity');
-            applyAdminTheme();
-            renderData();
-            renderWarga();
-            showAlert('Logout Berhasil');
-        }
-
-        function switchTab(tab) {
-            document.getElementById('content-kas').classList.toggle('hidden', tab !== 'kas');
-            document.getElementById('content-warga').classList.toggle('hidden', tab !== 'warga');
-            document.getElementById('tab-kas').classList.toggle('active', tab === 'kas');
-            document.getElementById('tab-warga').classList.toggle('active', tab === 'warga');
-        }
-
-        function toggleWargaSelect() {
-            const j = document.getElementById('jenis').value;
-            document.getElementById('warga-select-container').style.display = (j === 'pemasukan' ? 'block' : 'none');
-        }
-
         function populateWargaDropdown() {
             const s = document.getElementById('pilih-warga');
+            if (!s) return;
             s.innerHTML = '<option value="">-- Pilih Warga Cluster --</option>';
-            dataWarga.forEach(w => {
+            dataWarga.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(w => {
                 const o = document.createElement('option');
                 o.value = JSON.stringify({n: w.nama, a: w.alamat});
                 o.textContent = `${w.nama} (${w.alamat})`;
@@ -284,40 +519,9 @@
             });
         }
 
-        document.getElementById('transaksi-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            if(!isAdmin) return;
-            const j = document.getElementById('jenis').value;
-            const wv = document.getElementById('pilih-warga').value;
-            let n = 'Warga Umum', a = '-';
-            if(j==='pemasukan' && wv) { const p = JSON.parse(wv); n=p.n; a=p.a; }
-
-            dataTransaksi.push({
-                id: Date.now(),
-                tanggal: document.getElementById('tgl').value,
-                pembayar: n,
-                alamat: a,
-                keterangan: document.getElementById('ket').value,
-                jenis: j,
-                jumlah: parseFloat(document.getElementById('jumlah').value)
-            });
-            saveData(); renderData(); e.target.reset(); toggleWargaSelect(); showAlert('Transaksi Cluster Disimpan');
-        });
-
-        document.getElementById('warga-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            if(!isAdmin) return;
-            dataWarga.push({
-                id: Date.now(),
-                nama: document.getElementById('warga-nama').value,
-                alamat: document.getElementById('warga-alamat').value,
-                status: document.getElementById('warga-status').value
-            });
-            saveWarga(); renderWarga(); populateWargaDropdown(); e.target.reset(); showAlert('Warga Berhasil Ditambahkan');
-        });
-
         function renderData() {
             const c = document.getElementById('daftar-transaksi');
+            if (!c) return;
             c.innerHTML = '';
             let ti=0, to=0;
             const sorted = [...dataTransaksi].sort((a,b)=>new Date(b.tanggal)-new Date(a.tanggal));
@@ -330,15 +534,20 @@
                     <div class="flex flex-col">
                         <div class="flex items-center gap-2 mb-1">
                             <span class="text-[9px] font-bold text-gray-400">${item.tanggal}</span>
-                            <span class="text-[8px] font-black px-1.5 py-0.5 rounded ${item.jenis==='pemasukan'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${item.jenis==='pemasukan'?'DEBIT':'KREDIT'}</span>
+                            <span class="text-[8px] font-black px-1.5 py-0.5 rounded ${item.jenis==='pemasukan'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'} tracking-tighter">${item.jenis==='pemasukan'?'DEBIT':'KREDIT'}</span>
                         </div>
                         <span class="text-sm font-bold text-gray-800">${item.pembayar}</span>
-                        <span class="text-[10px] text-blue-600 font-bold -mt-1 mb-1">${item.alamat}</span>
-                        <span class="text-[11px] text-gray-500 italic">${item.keterangan}</span>
+                        <span class="text-[10px] text-blue-600 font-bold -mt-0.5 mb-1 tracking-tight">${item.alamat}</span>
+                        <span class="text-[11px] text-gray-500 italic leading-tight">${item.keterangan}</span>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right flex flex-col items-end">
                         <span class="text-sm font-black ${item.jenis==='pemasukan'?'text-green-600':'text-red-600'}">${formatRupiah(item.jumlah)}</span>
-                        ${isAdmin ? `<button onclick="hapusKas(${item.id})" class="block text-[10px] text-red-400 mt-1 ml-auto">Hapus</button>` : ''}
+                        ${isAdmin ? `
+                            <div class="flex gap-1 justify-end mt-2">
+                                <button onclick="editKas('${item.id}')" class="text-[9px] font-black text-blue-500 px-2 py-1 bg-blue-50 rounded-lg uppercase">Edit</button>
+                                <button onclick="hapusKas('${item.id}')" class="text-[9px] font-black text-red-400 px-2 py-1 bg-red-50 rounded-lg uppercase">Hapus</button>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
                 c.appendChild(card);
@@ -353,49 +562,64 @@
 
         function renderWarga() {
             const l = document.getElementById('daftar-warga-list');
+            if (!l) return;
             l.innerHTML = '';
             document.getElementById('counter-warga').innerText = `${dataWarga.length} Warga Cluster`;
-            dataWarga.forEach(w => {
+            dataWarga.sort((a,b) => a.nama.localeCompare(b.nama)).forEach(w => {
                 const item = document.createElement('div');
                 item.className = "bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center";
                 item.innerHTML = `
                     <div>
                         <p class="text-sm font-bold">${w.nama}</p>
-                        <p class="text-xs text-gray-500">Blok ${w.alamat} • Status ${w.status}</p>
+                        <p class="text-xs text-gray-500">Blok ${w.alamat} • <span class="font-bold text-blue-600">${w.status}</span></p>
                     </div>
-                    ${isAdmin ? `<button onclick="hapusWarga(${w.id})" class="text-red-400 p-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>` : ''}
+                    ${isAdmin ? `<button onclick="hapusWarga('${w.id}')" class="bg-red-50 text-red-400 p-2 rounded-xl transition hover:bg-red-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>` : ''}
                 `;
                 l.appendChild(item);
             });
         }
 
-        function hapusKas(id) { if(isAdmin && confirm('Hapus transaksi ini?')) { dataTransaksi = dataTransaksi.filter(x=>x.id!==id); saveData(); renderData(); } }
-        function hapusWarga(id) { if(isAdmin && confirm('Hapus data warga ini?')) { dataWarga = dataWarga.filter(x=>x.id!==id); saveWarga(); renderWarga(); populateWargaDropdown(); } }
-        function saveData() { localStorage.setItem('kas_eternity_data', JSON.stringify(dataTransaksi)); }
-        function saveWarga() { localStorage.setItem('warga_eternity_data', JSON.stringify(dataWarga)); }
-        function formatRupiah(n) { return 'Rp' + n.toLocaleString('id-ID'); }
-        function showAlert(m, c='bg-gray-900') {
+        window.hapusWarga = async (id) => {
+            if(!isAdmin) return;
+            if(confirm("Hapus data warga ini?")) {
+                try {
+                    await deleteDoc(doc(db, PATH_WARGA, id));
+                    showAlert("Data warga dihapus");
+                } catch(e) { showAlert("Gagal menghapus", "bg-red-600"); }
+            }
+        };
+
+        function formatRupiah(n) { return 'Rp' + (n || 0).toLocaleString('id-ID'); }
+        
+        function showAlert(m, c='bg-blue-600') {
             const b = document.getElementById('custom-alert');
             const bg = document.getElementById('alert-bg');
             document.getElementById('alert-msg').innerText = m;
             bg.className = `${c} text-white px-6 py-4 rounded-2xl shadow-2xl`;
             b.classList.remove('hidden');
-            setTimeout(()=>b.classList.add('hidden'), 2000);
+            setTimeout(()=>b.classList.add('hidden'), 2500);
         }
 
         function initCharts() {
             const ctx = document.getElementById('trenChart');
+            if (!ctx) return;
             trenChart = new Chart(ctx, {
                 type: 'bar',
                 data: { labels: [], datasets: [
                     { label: 'Debit', backgroundColor: '#3b82f6', borderRadius: 4, data: [] },
                     { label: 'Kredit', backgroundColor: '#f87171', borderRadius: 4, data: [] }
                 ]},
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { display: false }, grid: { display: false } } }
+                }
             });
         }
 
         function updateChartData() {
+            if (!trenChart) return;
             const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
             const last3 = [];
             for(let i=2; i>=0; i--) {
@@ -413,20 +637,66 @@
             trenChart.update();
         }
 
-        function downloadLaporanExcel() {
-            const sorted = [...dataTransaksi].sort((a,b)=>new Date(a.tanggal)-new Date(b.tanggal));
-            let bal = 0;
-            const rows = sorted.map((t, idx) => {
-                const d = t.jenis==='pemasukan'?t.jumlah:0;
-                const k = t.jenis==='pengeluaran'?t.jumlah:0;
-                bal += (d-k);
-                return { 'No': idx+1, 'Tanggal': t.tanggal, 'Warga': t.pembayar, 'Blok': t.alamat, 'Keterangan': t.keterangan, 'Debit': d, 'Kredit': k, 'Saldo': bal };
-            });
-            const ws = XLSX.utils.json_to_sheet(rows);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Laporan_Cluster_Eternity");
-            XLSX.writeFile(wb, "Laporan_Kas_Cluster_Eternity.xlsx");
-        }
+        document.getElementById('transaksi-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!isAdmin || !currentUser) return;
+            
+            const editId = document.getElementById('edit-id').value;
+            const j = document.getElementById('jenis').value;
+            const wv = document.getElementById('pilih-warga').value;
+            const jumlahAsli = document.getElementById('jumlah-asli').value;
+            
+            if (!jumlahAsli || isNaN(jumlahAsli)) {
+                showAlert('Masukkan nominal valid!', 'bg-red-600');
+                return;
+            }
+
+            let n = 'PENGELUARAN UMUM', a = '-';
+            if(j==='pemasukan' && wv) { const p = JSON.parse(wv); n=p.n; a=p.a; }
+            
+            const payload = {
+                tanggal: document.getElementById('tgl').value,
+                pembayar: n,
+                alamat: a,
+                keterangan: document.getElementById('ket').value,
+                jenis: j,
+                jumlah: parseFloat(jumlahAsli),
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, PATH_TRANS, editId), payload);
+                    showAlert('Transaksi Berhasil Diperbarui');
+                } else {
+                    payload.createdAt = new Date().toISOString();
+                    await addDoc(collection(db, PATH_TRANS), payload);
+                    showAlert('Transaksi Berhasil Disimpan');
+                }
+                resetForm();
+            } catch (err) { showAlert('Gagal menyimpan', 'bg-red-600'); }
+        });
+
+        document.getElementById('warga-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!isAdmin || !currentUser) return;
+            const payload = {
+                nama: document.getElementById('warga-nama').value,
+                alamat: document.getElementById('warga-alamat').value,
+                status: document.getElementById('warga-status').value
+            };
+            try {
+                await addDoc(collection(db, PATH_WARGA), payload);
+                e.target.reset();
+                showAlert('Warga Berhasil Ditambahkan');
+            } catch (err) { showAlert('Gagal menyimpan warga', 'bg-red-600'); }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            applyAdminTheme();
+            init();
+        });
     </script>
 </body>
 </html>
